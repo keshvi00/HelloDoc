@@ -91,7 +91,8 @@ const getAppointments = async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate('patientId', 'fullName email')
-      .populate('doctorId', 'fullName email');
+      .populate('doctorId', 'fullName email')
+      .lean();
 
     return res.status(200).json(
       responseBody(200, 'Appointments retrieved successfully', appointments)

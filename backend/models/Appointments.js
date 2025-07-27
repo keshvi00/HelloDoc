@@ -88,4 +88,9 @@ appointmentSchema.pre('validate', async function(next) {
   next();
 });
 
+appointmentSchema.index({ doctorId: 1 });
+appointmentSchema.index({ patientId: 1 });
+appointmentSchema.index({ scheduledFor: 1 });
+
+
 module.exports = mongoose.model('Appointment', appointmentSchema);
