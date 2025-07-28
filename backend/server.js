@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const { connectDB } = require('./config/db');
 const { responseBody } = require('./config/responseBody');
 const messageRoutes = require('./routes/messageRoutes');
+const compression = require('compression');
 
 require('dotenv').config();
 
@@ -15,7 +16,23 @@ const app = express();
 
 connectDB();
 
+app.use(compression());
+
+
 app.use(helmet());
+app.use(helmet.noSniff()); // X-Content-Type-Options: nosniff
+app.use(helmet.frameguard({ action: 'deny' })); // X-Frame-Options: DENY
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'", "https://apis.google.com"],
+    objectSrc: ["'none'"],
+    upgradeInsecureRequests: [],
+  },
+}));
+app.disable('x-powered-by');
+
+
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*'
 }));
@@ -58,7 +75,7 @@ app.get('/', (req, res) => {
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log('Server running on port ${PORT}');
   });
 }
 
@@ -78,7 +95,7 @@ app.use((err, req, res, next) => {
 
   if (err.name === 'MulterError') {
     return res.status(400).json(
-      responseBody(400, `Upload error: ${err.message}`, null)
+      responseBody(400, 'Upload error: ${err.message}', null)
     );
   }
 
